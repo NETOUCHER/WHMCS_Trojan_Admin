@@ -704,7 +704,39 @@ function TrojanAdmin_node($params) {
 	}
 	// Looping through the json, configure each product
 	foreach ($product_json[$product_name] as $serv => $prop) {
-		$html .= $prop['server_addr'].":".$prop['server_port']."<br>";
+		$db_server = $prop['mysql_server'];
+		$db_name = $prop['mysql_database'];
+		$db_port = $prop['mysql_port'];
+		$db_charset = $prop['mysql_charset'];
+		$db_user = $prop['mysql_user'];
+		$db_pwd = $prop['mysql_passwd'];
+		$dsn = "mysql:host=".$db_server.";dbname=".$db_name.";port=".$db_port.";charset=".$db_charset;
+
+		$attr = array(
+				PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+		);
+		
+		try
+		{
+			$pdo = new PDO($dsn, $db_user, $db_pwd, $attr);
+			$stmt = $pdo->prepare("SELECT quota FROM users WHERE pid=:serviceid");
+			$stmt->execute(array(':serviceid' => $params['serviceid']));
+			$query = $stmt->fetch(PDO::FETCH_BOTH);
+			if($query['quota']!=-1) {
+				$traffic = $query['quota'] / 1073741824;
+				$free = $traffic - $usage;
+				$traffic = round($traffic,2);
+			} else {
+				$traffic = NULL;
+			}
+
+			if( !isset($traffic) || $traffic!=0 ) {
+				$html .= $prop['server_addr'].":".$prop['server_port']."<br>";
+			}
+		}
+		catch(PDOException $e){
+			$html .= "[!node]".$e->getMessage()."<br>";
+		}
 	}
 	return $html;
 }
@@ -721,8 +753,40 @@ function TrojanAdmin_link($params) {
 	}
 	// Looping through the json, configure each product
 	foreach ($product_json[$product_name] as $serv => $prop) {
-		$originalcode=$password."@".$prop['server_addr'].":".$prop['server_port'];
-		$output .= 'trojan://'.$originalcode.'<br>';
+		$db_server = $prop['mysql_server'];
+		$db_name = $prop['mysql_database'];
+		$db_port = $prop['mysql_port'];
+		$db_charset = $prop['mysql_charset'];
+		$db_user = $prop['mysql_user'];
+		$db_pwd = $prop['mysql_passwd'];
+		$dsn = "mysql:host=".$db_server.";dbname=".$db_name.";port=".$db_port.";charset=".$db_charset;
+
+		$attr = array(
+				PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+		);
+		
+		try
+		{
+			$pdo = new PDO($dsn, $db_user, $db_pwd, $attr);
+			$stmt = $pdo->prepare("SELECT quota FROM users WHERE pid=:serviceid");
+			$stmt->execute(array(':serviceid' => $params['serviceid']));
+			$query = $stmt->fetch(PDO::FETCH_BOTH);
+			if($query['quota']!=-1) {
+				$traffic = $query['quota'] / 1073741824;
+				$free = $traffic - $usage;
+				$traffic = round($traffic,2);
+			} else {
+				$traffic = NULL;
+			}
+
+			if( !isset($traffic) || $traffic!=0 ) {
+				$originalcode=$password."@".$prop['server_addr'].":".$prop['server_port'];
+				$output .= 'trojan://'.$originalcode.'<br>';
+			}
+		}
+		catch(PDOException $e){
+			$output .= "[!link]".$e->getMessage()."<br>";
+		}
 	}
 	return $output;
 }
@@ -739,9 +803,41 @@ function TrojanAdmin_qrcode($params) {
 	}
 	// Looping through the json, configure each product
 	foreach ($product_json[$product_name] as $serv => $prop) {
-		$originalcode=$password."@".$prop['server_addr'].":".$prop['server_port'];
-		$output = 'trojan://'.$originalcode;
-		$imgs .= '<img src="https://example.com/modules/servers/TrojanAdmin/lib/QR_generator/qrcode.php?text='.$output.'" style="align=:center;" />&nbsp;';
+		$db_server = $prop['mysql_server'];
+		$db_name = $prop['mysql_database'];
+		$db_port = $prop['mysql_port'];
+		$db_charset = $prop['mysql_charset'];
+		$db_user = $prop['mysql_user'];
+		$db_pwd = $prop['mysql_passwd'];
+		$dsn = "mysql:host=".$db_server.";dbname=".$db_name.";port=".$db_port.";charset=".$db_charset;
+
+		$attr = array(
+				PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+		);
+		
+		try
+		{
+			$pdo = new PDO($dsn, $db_user, $db_pwd, $attr);
+			$stmt = $pdo->prepare("SELECT quota FROM users WHERE pid=:serviceid");
+			$stmt->execute(array(':serviceid' => $params['serviceid']));
+			$query = $stmt->fetch(PDO::FETCH_BOTH);
+			if($query['quota']!=-1) {
+				$traffic = $query['quota'] / 1073741824;
+				$free = $traffic - $usage;
+				$traffic = round($traffic,2);
+			} else {
+				$traffic = NULL;
+			}
+
+			if( !isset($traffic) || $traffic!=0 ) {
+				$originalcode=$password."@".$prop['server_addr'].":".$prop['server_port'];
+				$output = 'trojan://'.$originalcode;
+				$imgs .= '<img src="https://example.com/modules/servers/TrojanAdmin/lib/QR_generator/qrcode.php?text='.$output.'" style="align=:center;" />&nbsp;';
+			}
+		}
+		catch(PDOException $e){
+			$imgs .= "[!img]".$e->getMessage()."<br>";
+		}
 	}
   	return $imgs;
 }
@@ -804,7 +900,7 @@ function TrojanAdmin_ClientArea($params) {
 		try
 		{
 			$pdo = new PDO($dsn, $db_user, $db_pwd, $attr);
-			$traffic = $params['configoptions']['Traffic'];
+			#$traffic = $params['configoptions']['Traffic'];
 			$stmt = $pdo->prepare("SELECT sum(download+upload),quota FROM users WHERE pid=:serviceid");
 			$stmt->execute(array(':serviceid' => $params['serviceid']));
 			$query = $stmt->fetch(PDO::FETCH_BOTH);
@@ -848,18 +944,20 @@ function TrojanAdmin_ClientArea($params) {
 		}
 
 		if (isset( $traffic )) {
-			$html .= "
-			<br>
-			<p>{$thisserver}</p>
-			<div class=\"progress\" style=\"align=center;width=80%;\">
-					<div role=\"progressbar\" aria-valuenow=\"60\" aria-valuemin=\"0\" aria-valuemax=\"100\" class=\"progress-bar progress-bar-warning\" style=\"width: {$usagerate}%;\">
-					<span>Used {$usage} GB</span>
-					</div>
-					<div role=\"progressbar\" aria-valuenow=\"60\" aria-valuemin=\"0\" aria-valuemax=\"100\" class=\"progress-bar progress-bar-success\" style=\"width: {$freerate}%;\">
-						<span>Balance {$free} GB</span>
-					</div>
-			</div>
-				";
+			if($traffic!=0) {
+				$html .= "
+				<br>
+				<p>{$thisserver}</p>
+				<div class=\"progress\" style=\"align=center;width=80%;\">
+						<div role=\"progressbar\" aria-valuenow=\"60\" aria-valuemin=\"0\" aria-valuemax=\"100\" class=\"progress-bar progress-bar-warning\" style=\"width: {$usagerate}%;\">
+						<span>Used {$usage} GB</span>
+						</div>
+						<div role=\"progressbar\" aria-valuenow=\"60\" aria-valuemin=\"0\" aria-valuemax=\"100\" class=\"progress-bar progress-bar-success\" style=\"width: {$freerate}%;\">
+							<span>Balance {$free} GB</span>
+						</div>
+				</div>
+					";
+			}
 		} else {
 			$html .= "
 			<br>
@@ -878,7 +976,14 @@ function TrojanAdmin_ClientArea($params) {
 
 function TrojanAdmin_AdminServicesTabFields($params) {
 	$fieldsarray = array();
-
+	// Parse JSON config
+	$product_json = TrojanAdmin_ParseJSON();
+	// Reading product info from config.
+	$product_name=$params['configoption1'];
+	// Check if product JSON exist.
+	if(!array_key_exists($product_name, $product_json)) {
+		return "Product is not configured in JSON file.";
+	}
 	foreach ($product_json[$product_name] as $serv => $prop) {
 		$db_server = $prop['mysql_server'];
 		$db_name = $prop['mysql_database'];
@@ -898,10 +1003,18 @@ function TrojanAdmin_AdminServicesTabFields($params) {
 			$stmt = $pdo->prepare("SELECT sum(upload+download),quota FROM users WHERE pid=:serviceid");
 			$stmt->execute(array(':serviceid' => $params['serviceid']));
 			$Query = $stmt->fetch(PDO::FETCH_BOTH);
-			$Usage = round($Query[0]/1048576/1024,2);
-			$traffic = round($Query['quota'] / 1048576 / 1024,2);
+			$Used = round($Query[0]/1048576/1024,2);
+			if($Query['quota']==-1) {
+				$traffic=NULL;
+			}
+			else {
+				$traffic = round($Query['quota'] / 1048576 / 1024,2);
+			}			
 			$Free = round($traffic - $Usage,2);
-			$fieldsarray[$serv." traffic stats(F/U/T) in GB"] = $Free."/".$Usage."/".$traffic;
+			if(!isset($traffic) || $traffic!=0 ) {
+				$tmp_arr = array($serv.'-Stats' => 'Free: '.$Free."/ Used: ".$Used."/ Total: ".$traffic);
+				$fieldsarray += $tmp_arr;
+			}
 		}
 		catch(PDOException $e){
 				$fieldsarray = array(
