@@ -5,7 +5,7 @@ Make WHMCS Great Again.
 Please move the products_JSON.php to a directory unreachable by web access. Otherwise your password will be exposed to everyone!
 
 ### MySQL DB Structure
-
+<pre>
 CREATE TABLE users (
     id INT UNSIGNED NOT NULL AUTO_INCREMENT,
     password CHAR(56) NOT NULL,
@@ -17,3 +17,4 @@ CREATE TABLE users (
     INDEX (password),
     INDEX (pid)
 );
+</pre>
