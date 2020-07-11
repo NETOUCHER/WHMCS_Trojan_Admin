@@ -781,7 +781,7 @@ function TrojanAdmin_link($params) {
 
 			if( !isset($traffic) || $traffic!=0 ) {
 				$originalcode=$password."@".$prop['server_addr'].":".$prop['server_port'];
-				// $originalcode .= "#".$prop['friendly_name']
+				// $originalcode .= "#".$prop['friendly_name'];
 				$output .= 'trojan://'.$originalcode.'<br>';
 			}
 		}
@@ -832,7 +832,7 @@ function TrojanAdmin_qrcode($params) {
 
 			if( !isset($traffic) || $traffic!=0 ) {
 				$originalcode=$password."@".$prop['server_addr'].":".$prop['server_port'];
-				// $originalcode .= "#".$prop['friendly_name']
+				// $originalcode .= "#".$prop['friendly_name'];
 				$output = 'trojan://'.$originalcode;
 				$imgs .= '<img src="https://example.com/modules/servers/TrojanAdmin/lib/QR_generator/qrcode.php?text='.$output.'" style="align=:center;" />&nbsp;';
 			}
