@@ -1012,7 +1012,7 @@ function TrojanAdmin_AdminServicesTabFields($params) {
 			else {
 				$traffic = round($Query['quota'] / 1048576 / 1024,2);
 			}			
-			$Free = round($traffic - $Usage,2);
+			$Free = round($traffic - $Used,2);
 			if(!isset($traffic) || $traffic!=0 ) {
 				$tmp_arr = array($serv.'-Stats' => 'Free: '.$Free."/ Used: ".$Used."/ Total: ".$traffic);
 				$fieldsarray += $tmp_arr;
