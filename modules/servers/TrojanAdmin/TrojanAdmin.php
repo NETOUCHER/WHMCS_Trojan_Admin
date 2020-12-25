@@ -165,9 +165,38 @@ function TrojanAdmin_CreateAccount($params) {
 				echo "Password update failed.Bad Capsule function. {$e->getMessage()}";
 				}
 				$password = $params["customfields"]['password'];
-			} elseif (strpos($password,'#')!==false) {
-				# TODO: Filter out all #'s in $password
+			} elseif (strpos($password,'#')!==false || strpos($password,'@')!==false) {
+				# TODO: Filter out all #'s/@'s in $password
+				# Current Bad Solution: Hard-Translation and Overwrite
+				$search = array('#','@');
+				$replace = array('S','A'); // Sharp, At
+				$password = str_replace($search, $replace, $password);
 				
+				# Save overwrite:
+				$command = 'EncryptPassword';
+				$postData = array(
+				  'password2' => $password,
+				);
+
+				try {
+					$adminuser = $adminusername['username'];
+				} catch (Exception $e) {
+					die("Failure in adminuser define. No username in the ARRAY adminusername could be found.");
+				}
+				$adminuser = $adminusername['username'];
+				$results = localAPI($command, $postData, $adminuser);
+				$table = 'tblhosting';
+				try {
+				$updatedUserCount = Capsule::table($table)
+				->where('id', $params["serviceid"])
+				->update(
+				  [
+					'password' => $results['password'],
+					  ]
+				);
+				} catch (\Exception $e) {
+				echo "Password update failed.Bad Capsule function. {$e->getMessage()}";
+				}
 			}
 			// Hash the final password
 			$password2submit = hash("sha224", $password);
