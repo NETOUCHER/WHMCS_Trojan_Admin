@@ -165,6 +165,9 @@ function TrojanAdmin_CreateAccount($params) {
 				echo "Password update failed.Bad Capsule function. {$e->getMessage()}";
 				}
 				$password = $params["customfields"]['password'];
+			} elseif (strpos($password,'#')!==false) {
+				# TODO: Filter out all #'s in $password
+				
 			}
 			// Hash the final password
 			$password2submit = hash("sha224", $password);
