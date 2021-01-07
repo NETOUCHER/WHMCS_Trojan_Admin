@@ -1,4 +1,7 @@
 # WHMCS_Trojan_Admin
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/NETOUCHER/WHMCS_Trojan_Admin/graphs/commit-activity) 
+[![Generic badge](https://img.shields.io/badge/PHP-7-GREEN.svg)](https://www.php.net/ChangeLog-7.php)
+
 Make WHMCS Great Again.
 
 ### Important Notification
